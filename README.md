@@ -70,7 +70,7 @@ The aim of this project was to take a baseline installation of a Linux distribut
   - `sudo mkdir catalog`
   - Change owner of the newly created catalog folder `sudo chown -R grader:grader catalog`
   - `cd /catalog`
-  - Clone this project from github `git clone https://github.com/arushidoshi/Item_Catalog`
+  - Clone [this](https://github.com/arushidoshi/Item_Catalog) project from github using `git clone https://github.com/arushidoshi/Item_Catalog`
   - Create a catalog.wsgi file, then add this inside:
   ```
   import sys
