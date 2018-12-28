@@ -27,7 +27,7 @@ The aim of this project was to take a baseline installation of a Linux distribut
 3. Change SSH port from 22 to 2200
   - Run `sudo nano /etc/ssh/sshd_config`
   - Change the port from 22 to 2200
-  - Confirm by running `ssh -i ~/.ssh/udacity_key.rsa -p 2200 root@34.251.36.181`
+  - Confirm by running `ssh -i ~/.ssh/udacity_key.pem -p 2200 ubuntu@34.251.36.181`
   
 4. Configure the Uncomplicated Firewall (UFW) to only allow incoming connections for SSH (port 2200), HTTP (port 80), and NTP (port 123)
   - `sudo ufw allow 2200/tcp`
@@ -39,7 +39,8 @@ The aim of this project was to take a baseline installation of a Linux distribut
   - Run `sudo dpkg-reconfigure tzdata` -> Choose None of the above -> Choose UTC
  
 6. Configure key-based authentication for **grader**
-  - Login as grader, and run the following
+  - On the local machine, generate keys using `ssh-keygen` and save the key in local directory.
+  - Login to the server as grader with `ssh grader@34.251.36.181 -p 2200`, enter password created during user setup (if any), and then run following in the server:
     - mkdir .ssh
     - touch .ssh/authorized_keys 
     - nano .ssh/authorized_keys
@@ -69,9 +70,9 @@ The aim of this project was to take a baseline installation of a Linux distribut
   - `cd /var/www`
   - `sudo mkdir catalog`
   - Change owner of the newly created catalog folder `sudo chown -R grader:grader catalog`
-  - `cd /catalog`
-  - Clone [this](https://github.com/arushidoshi/Item_Catalog) project from github using `git clone https://github.com/arushidoshi/Item_Catalog`
-  - Create a catalog.wsgi file, then add this inside:
+  - `cd catalog`
+  - Clone this project from github `git clone https://github.com/arushidoshi/Item_Catalog`
+  - Create a catalog.wsgi file and add the following:
   ```
   import sys
   import logging
@@ -81,6 +82,7 @@ The aim of this project was to take a baseline installation of a Linux distribut
   from catalog import app as application
   application.secret_key = 'booklibrary_secret_key'
   ```
+  - Move the catalog folder of the repository into the current directory `catalog`. Use `sudo rm -R vagrant` to remove the cloned folder.
   - Rename my_project.py to __init__.py using `mv my_project.py __init__.py`
   
 11. Install virtual environment
@@ -94,12 +96,12 @@ The aim of this project was to take a baseline installation of a Linux distribut
   ---- catalog
             | ---- catalog  <- cloned git repo
                         | ---- all files from git repo
-                        | ---- venv
+                        | ---- venv  <- virtual environment
             | ---- catalog.wsgi
   ```
-12. Install Flask, SQLAlchemy, Oauth and other dependencies
+12. Inside the virtual environment, install Flask, SQLAlchemy, Oauth and other dependencies
   - Install Flask `pip install Flask`
-  - Install other project dependencies `sudo pip install httplib2 oauth2client sqlalchemy psycopg2 sqlalchemy_utils requests`
+  - Install other project dependencies `pip install httplib2 oauth2client sqlalchemy psycopg2 sqlalchemy_utils requests`
 
 13. Update path of client_secrets.json file
   - `nano __init__.py`
@@ -141,7 +143,7 @@ The aim of this project was to take a baseline installation of a Linux distribut
     - `CREATE USER catalog WITH PASSWORD 'password';`
     - `ALTER USER catalog CREATEDB;`
     - `CREATE DATABASE booklibrary WITH OWNER catalog;`
-    - `\c catalog`
+    - `\c booklibrary`
     - `REVOKE ALL ON SCHEMA public FROM public;`
     - `GRANT ALL ON SCHEMA public TO catalog;`
     - `\q`
@@ -150,7 +152,7 @@ The aim of this project was to take a baseline installation of a Linux distribut
   `engine = create_engine('postgresql://catalog:password@localhost/booklibrary')`
   - For setting up the database, run `python /var/www/catalog/catalog/database_setup.py`
   - For populating the database with sample of books, run `python /var/www/catalog/catalog/lotsofbooks.py`
-  - To ensure that no remote connections to the database are allowed, check if the contents of the file `sudo nano /etc/postgresql/9.3/main/pg_hba.conf` look like this:
+  - To ensure that no remote connections to the database are allowed, check if the output of the command `sudo nano /etc/postgresql/9.5/main/pg_hba.conf` look like this:
   ```
   local   all             postgres                                peer
   local   all             all                                     peer
